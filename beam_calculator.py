@@ -148,8 +148,9 @@ class BeamAnalyzer:
         ax2.grid(True, alpha=0.3)
         ax2.legend()
         
-        # Add support annotations
-        for react in reactions := self.calculate_reactions():
+        # Fixed: Calculate reactions before the loop
+        reactions = self.calculate_reactions()
+        for react in reactions:
             pos = react[1]
             if react[0] == 'roller':
                 ax1.plot(pos, 0, 'go', markersize=10, label='Support')
