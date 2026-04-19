@@ -127,16 +127,6 @@ with col1:
             'x': beam.x, 'V': V, 'M': M,
             'max_vals': beam.get_max_values()
         }
-        
-        # Display plots
-        fig = beam.plot_diagrams()
-        st.pyplot(fig)
-        
-        # Store for export
-        st.session_state.results = {
-            'x': beam.x, 'V': V, 'M': M,
-            'max_vals': beam.get_max_values()
-        }
 
 with col2:
     st.subheader("Current Loads")
