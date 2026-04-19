@@ -1,5 +1,6 @@
 import streamlit as st
 import numpy as np
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from beam_calculator import BeamAnalyzer
 import pandas as pd
 
