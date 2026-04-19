@@ -91,23 +91,42 @@ if 'loads' not in st.session_state:
 col1, col2 = st.columns([2, 1])
 
 with col1:
+    st.subheader("Beam Configuration Preview")
+    
+    # 1. Create beam analyzer and load it OUTSIDE the button
+    # This allows the preview diagram to update dynamically
+    beam = BeamAnalyzer(L, beam_type)
+    
+    for load in st.session_state.loads:
+        if load['type'] == 'point':
+            beam.add_point_load(load['pos'], load['mag'], load['direction'])
+        elif load['type'] == 'udl':
+            beam.add_udl(load['start'], load['end'], load['intensity'], load['direction'])
+        elif load['type'] == 'moment':
+            beam.add_moment(load['pos'], load['mag'], load['direction'])
+            
+    # 2. Display the setup diagram immediately
+    setup_fig = beam.plot_beam_setup()
+    st.pyplot(setup_fig)
+    
+    st.divider() # Add a visual separator
     st.subheader("Analysis Results")
     
+    # 3. Run Analysis button (beam is already populated with loads)
     if st.button("Run Analysis", type="primary"):
-        # Create beam analyzer
-        beam = BeamAnalyzer(L, beam_type)
-        
-        # Add all loads
-        for load in st.session_state.loads:
-            if load['type'] == 'point':
-                beam.add_point_load(load['pos'], load['mag'], load['direction'])
-            elif load['type'] == 'udl':
-                beam.add_udl(load['start'], load['end'], load['intensity'], load['direction'])
-            elif load['type'] == 'moment':
-                beam.add_moment(load['pos'], load['mag'], load['direction'])
         
         # Calculate
         V, M = beam.analyze()
+        
+        # Display plots
+        fig = beam.plot_diagrams()
+        st.pyplot(fig)
+        
+        # Store for export
+        st.session_state.results = {
+            'x': beam.x, 'V': V, 'M': M,
+            'max_vals': beam.get_max_values()
+        }
         
         # Display plots
         fig = beam.plot_diagrams()
