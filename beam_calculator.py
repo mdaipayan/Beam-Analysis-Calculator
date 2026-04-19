@@ -83,7 +83,45 @@ class BeamAnalyzer:
             return [('fixed', 0, -total_force, -total_moment)]
         
         return []
-    
+        
+    def plot_beam_setup(self):
+        """Generate a diagram of the beam, supports, and loads before analysis"""
+        fig, ax = plt.subplots(figsize=(10, 4))
+        
+        # Draw the beam body
+        ax.plot([0, self.L], [0, 0], color='black', linewidth=6, solid_capstyle='butt')
+        
+        # Add Supports
+        reactions = self.calculate_reactions()
+        for react in reactions:
+            pos = react[1]
+            if react[0] == 'roller':
+                ax.plot(pos, -0.1, '^', color='green', markersize=15, label='Support')
+            elif react[0] == 'fixed':
+                ax.axvline(x=pos, ymin=0.4, ymax=0.6, color='red', linewidth=4, label='Fixed End')
+
+        # Add Loads
+        for load in self.loads:
+            if load['type'] == 'point':
+                direction = 1 if load['mag'] > 0 else -1
+                ax.annotate('', xy=(load['pos'], 0), xytext=(load['pos'], 0.5 * -direction),
+                            arrowprops=dict(facecolor='blue', shrink=0, width=2, headwidth=8))
+                ax.text(load['pos'], 0.6 * -direction, f"{abs(load['mag'])}N", ha='center', color='blue')
+            
+            elif load['type'] == 'udl':
+                x_udl = np.linspace(load['start'], load['end'], 10)
+                for x_pos in x_udl:
+                    ax.annotate('', xy=(x_pos, 0), xytext=(x_pos, 0.3),
+                                arrowprops=dict(edgecolor='orange', arrowstyle='->', alpha=0.5))
+                ax.plot([load['start'], load['end']], [0.3, 0.3], color='orange', linewidth=2)
+                ax.text((load['start'] + load['end'])/2, 0.4, f"{abs(load['intensity'])}N/m", ha='center', color='orange')
+
+        ax.set_ylim(-1, 1)
+        ax.set_xlim(-0.1 * self.L, 1.1 * self.L)
+        ax.set_title("Beam Loading Setup")
+        ax.axis('off')
+        plt.tight_layout()
+        return fig
     def analyze(self):
         """Perform beam analysis"""
         self.V = np.zeros_like(self.x)
